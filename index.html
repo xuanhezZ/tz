@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>跳转中...</title>
+<style>
+body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f5f5;font-family:-apple-system,sans-serif;}
+.box{text-align:center;padding:40px 30px;background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);max-width:300px;}
+.btn{display:inline-block;padding:14px 40px;background:#12b7f5;color:#fff;border-radius:24px;font-size:16px;text-decoration:none;margin-top:20px;}
+.btn:active{opacity:.8;}
+.tip{color:#999;font-size:13px;margin-top:16px;}
+</style>
+</head>
+<body>
+<div class="box">
+  <div id="msg">正在跳转...</div>
+  <a id="jumpBtn" class="btn" href="#">点此继续</a>
+  <div class="tip" id="tip"></div>
+  <iframe id="fv" style="display:none"></iframe>
+</div>
+<script>
+(function(){
+  var params = new URLSearchParams(location.search);
+  var to = params.get('to');
+  if(!to){ document.getElementById('msg').innerText='缺少 to 参数'; return; }
+  var target;
+  try {
+    target = atob(to);
+    if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(target)) throw 0;
+  } catch(e){ target = decodeURIComponent(to); }
+
+  var btn = document.getElementById('jumpBtn');
+  btn.href = target;
+
+  function go(){
+    try { location.href = target; return; } catch(e){}
+    try { location.replace(target); return; } catch(e){}
+    try { var a = document.createElement('a'); a.href = target; a.style.display='none'; document.body.appendChild(a); a.click(); return; } catch(e){}
+    try { document.getElementById('fv').src = target; return; } catch(e){}
+  }
+
+  // 立即触发一次
+  go();
+  // 不同延时再触发几次，提高成功率
+  setTimeout(go, 100);
+  setTimeout(go, 300);
+  setTimeout(go, 800);
+  setTimeout(go, 1500);
+
+  // 用户点击兜底
+  btn.addEventListener('click', function(e){ e.preventDefault(); go(); });
+
+  // 5 秒后如果还在当前页，给提示
+  setTimeout(function(){
+    document.getElementById('msg').innerText = '未自动跳转';
+    document.getElementById('tip').innerText = '请点击下方按钮';
+  }, 5000);
+})();
+</script>
+</body>
+</html>
